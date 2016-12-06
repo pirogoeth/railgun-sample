@@ -7,7 +7,7 @@ This is a super simple example Rails app demonstrating how to use Railgun / mail
 Installation
 ============
 
-I recommend using (asdf-vm)[https://github.com/asdf-vm/asdf] to build a Ruby install.
+I recommend using [asdf-vm](https://github.com/asdf-vm/asdf) to build a Ruby install.
 Once you've set up your Ruby install:
 
 ```
