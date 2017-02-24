@@ -40,6 +40,18 @@ class UsersController < ApplicationController
         # Make sure you send the message!
         message.deliver_now
 
+        # Send a separate Railgun Info message...
+        message = DefaultMailer.railgun_info(@user)
+        # Here, you can add custom values to the `mailgun_` attributes
+        # on your message to provide headers, options, variables, and
+        # recipient vars to the Mailgun API.
+        message.mailgun_options ||= { "tracking-opens" => "true" }
+        message.mailgun_headers ||= { "X-Rails-Sender" => "users_controller" }
+        message.mailgun_headers ||= { "X-Rails-Attach" => "true" }
+
+        # Deliver it!
+        message.deliver_now
+
         format.html { redirect_to @user, notice: 'User was successfully created.' }
         format.json { render :show, status: :created, location: @user }
       else
