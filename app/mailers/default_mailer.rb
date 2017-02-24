@@ -9,7 +9,10 @@ class DefaultMailer < ApplicationMailer
   def railgun_info(user)
     @user = user
 
-    attachments['railgun_info.pdf'] = File.read('app/assets/attach/railgun-testing.pdf')
+    attachments['railgun_info.pdf'] = {
+      :content => File.read('app/assets/attach/railgun-testing.pdf'),
+      :mime_type => 'application/pdf',
+    }
 
     mail to: @user.address, subject: 'Railgun Information'
   end

@@ -1,7 +1,7 @@
 # require 'app/mailers/default_mailer'
 
 class UsersController < ApplicationController
-  before_action :set_user, only: [:show, :edit, :update, :destroy]
+  before_action :set_user, only: [:show, :edit, :update, :destroy, :send_user_messages]
 
   # GET /users
   # GET /users.json
@@ -30,27 +30,7 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       if @user.save
-        message = DefaultMailer.welcome_message(@user)
-        # Here, you can add custom values to the `mailgun_` attributes
-        # on your message to provide headers, options, variables, and
-        # recipient vars to the Mailgun API.
-        message.mailgun_options ||= { "tracking-opens" => "true" }
-        message.mailgun_headers ||= { "X-Rails-Sender" => "users_controller" }
-
-        # Make sure you send the message!
-        message.deliver_now
-
-        # Send a separate Railgun Info message...
-        message = DefaultMailer.railgun_info(@user)
-        # Here, you can add custom values to the `mailgun_` attributes
-        # on your message to provide headers, options, variables, and
-        # recipient vars to the Mailgun API.
-        message.mailgun_options ||= { "tracking-opens" => "true" }
-        message.mailgun_headers ||= { "X-Rails-Sender" => "users_controller" }
-        message.mailgun_headers ||= { "X-Rails-Attach" => "true" }
-
-        # Deliver it!
-        message.deliver_now
+        send_messages
 
         format.html { redirect_to @user, notice: 'User was successfully created.' }
         format.json { render :show, status: :created, location: @user }
@@ -85,6 +65,26 @@ class UsersController < ApplicationController
     end
   end
 
+  # GET /users/1/send_user_messages
+  # GET /users/1/send_user_messages.json
+  def send_user_messages
+    begin
+      send_messages
+    rescue Exception => exc
+      respond_to do |format|
+        format.html { redirect_to @user, notice: 'Could not send mails. Check console.' }
+        format.json { render :show, status: :mail_failed, location: @user }
+      end
+
+      raise exc
+    end
+
+    respond_to do |format|
+      format.html { redirect_to @user, notice: 'User mails have been sent.' }
+      format.json { render :show, status: :mail_success, location: @user }
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_user
@@ -95,4 +95,32 @@ class UsersController < ApplicationController
     def user_params
       params.require(:user).permit(:name, :address, :login)
     end
+
+    def send_messages
+      message = DefaultMailer.welcome_message(@user)
+      # Here, you can add custom values to the `mailgun_` attributes
+      # on your message to provide headers, options, variables, and
+      # recipient vars to the Mailgun API.
+      message.mailgun_options ||= { "tracking-opens" => "true" }
+      message.mailgun_headers ||= {
+        "X-Rails-Sender" => "users_controller",
+      }
+
+      # Make sure you send the message!
+      message.deliver_now
+
+      # Send a separate Railgun Info message...
+      message = DefaultMailer.railgun_info(@user)
+      # Here, you can add custom values to the `mailgun_` attributes
+      # on your message to provide headers, options, variables, and
+      # recipient vars to the Mailgun API.
+      message.mailgun_options ||= { "tracking-opens" => "true" }
+      message.mailgun_headers ||= {
+        "X-Rails-Sender" => "users_controller",
+      }
+
+      # Deliver it!
+      message.deliver_now
+    end
+
 end
