@@ -17,4 +17,9 @@ class DefaultMailer < ApplicationMailer
     mail to: @user.address, subject: 'Railgun Information'
   end
 
+  def text_only(user)
+    @user = user
+    mail to: @user.address, subject: 'Testing out some text-only goodness!'
+  end
+
 end

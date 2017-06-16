@@ -121,6 +121,19 @@ class UsersController < ApplicationController
 
       # Deliver it!
       message.deliver_now
+
+      # Send a text-only message...
+      message = DefaultMailer.text_only(@user)
+      # Here, you can add custom values to the `mailgun_` attributes
+      # on your message to provide headers, options, variables, and
+      # recipient vars to the Mailgun API.
+      message.mailgun_options ||= { "tracking-opens" => "true" }
+      message.mailgun_headers ||= {
+        "X-Rails-Sender" => "users_controller",
+      }
+
+      # Deliver it!
+      message.deliver_now
     end
 
 end
